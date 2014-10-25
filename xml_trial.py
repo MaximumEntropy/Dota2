@@ -16,7 +16,7 @@ GAMES_REQUEST_URL = 'https://api.steampowered.com/IDOTA2Match_570/GetMatchHistor
 
 MATCH_REQUEST_URL = 'https://api.steampowered.com/IDOTA2Match_570/GetMatchDetails/V001/?match_id='
 
-file_handler_match_id = open('match_ids.txt','r')
+file_handler_match_id = open('match_ids.txt','a')
 #file_handler_features = open('match_features.csv','a')
 file_handler_features = open('match_features.csv','r')
 
@@ -102,8 +102,8 @@ def populate_match_details():
 	match_ids = fetch_match_ids()
 	print match_ids
 	matches = []
-	match_ids = match_ids[3445:]
-	match_counter = 3445
+	match_ids = match_ids[5479:]
+	match_counter = 5479
 	for match_id in match_ids:
 		print 'Parsing match : ' + str(match_counter)
 		temp_match = Match()
@@ -142,8 +142,8 @@ def construct_training_data(match_data):
 
 
 def leave_one_out(training_data,test_point,results,test_result):
-	logreg.fit(training_data,results)
-	result = logreg.predict(test_point)
+	clf2.fit(training_data,results)
+	result = clf2.predict(test_point)
 	if result == test_result:
 		return True
 	else:
@@ -274,9 +274,12 @@ A = Match()
 A.match_id = '27110133'
 A.get_match_details()
 '''
-#get_match_recursively()
-#apsched.add_job(get_match_recursively, trigger='interval', seconds=1800)
-#apsched.start() # will block
+
+
+get_match_recursively()
+apsched.add_job(get_match_recursively, trigger='interval', seconds=1800)
+apsched.start() # will block
+
 
 '''
 x = populate_match_details()
@@ -284,7 +287,7 @@ training_data,results = construct_training_data(x)
 classifier(training_data,results)
 '''
 
-temp_classifier()
+#temp_classifier()
 
 
 
