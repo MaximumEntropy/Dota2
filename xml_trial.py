@@ -3,7 +3,9 @@ import xml.etree.ElementTree as ET
 from apscheduler.schedulers.blocking import BlockingScheduler
 from sklearn import svm, linear_model
 from sklearn import cross_validation
+from sklearn.ensemble import RandomForestClassifier
 
+rf = RandomForestClassifier(n_estimators=10, max_depth=None,min_samples_split=1, random_state=0)
 clf2 = svm.LinearSVC()
 clf = svm.SVC()
 logreg = linear_model.LogisticRegression(C=1e5)
@@ -16,7 +18,7 @@ GAMES_REQUEST_URL = 'https://api.steampowered.com/IDOTA2Match_570/GetMatchHistor
 
 MATCH_REQUEST_URL = 'https://api.steampowered.com/IDOTA2Match_570/GetMatchDetails/V001/?match_id='
 
-file_handler_match_id = open('match_ids.txt','a')
+file_handler_match_id = open('match_ids.txt','r')
 #file_handler_features = open('match_features.csv','a')
 file_handler_features = open('match_features.csv','r')
 
@@ -102,8 +104,8 @@ def populate_match_details():
 	match_ids = fetch_match_ids()
 	print match_ids
 	matches = []
-	match_ids = match_ids[5479:]
-	match_counter = 5479
+	match_ids = match_ids[6550:]
+	match_counter = 6500
 	for match_id in match_ids:
 		print 'Parsing match : ' + str(match_counter)
 		temp_match = Match()
@@ -142,8 +144,8 @@ def construct_training_data(match_data):
 
 
 def leave_one_out(training_data,test_point,results,test_result):
-	clf2.fit(training_data,results)
-	result = clf2.predict(test_point)
+	rf.fit(training_data,results)
+	result = rf.predict(test_point)
 	if result == test_result:
 		return True
 	else:
@@ -185,18 +187,18 @@ def temp_classifier():
 		else:
 			print 'False'
 			wrong = wrong + 1
-	accuracy = (float(correct))/(float(correct) + float(wrong))
-	print 'Accuracy : ' + str(accuracy)
+		accuracy = (float(correct))/(float(correct) + float(wrong))
+		print 'Accuracy : ' + str(accuracy)
 	'''
-	test_data = training_data[-200:]
-	training_data = training_data[:-200]
-	results_training = results[:-200]
-	results_test = results[-200:]
-	clf2.fit(training_data,results_training)
+	test_data = training_data[-int(0.3*len(training_data)):]
+	training_data = training_data[:-int(0.3*len(training_data))]
+	results_training = results[:-int(0.3*len(results))]
+	results_test = results[-int(0.3*len(results)):]
+	rf.fit(training_data,results_training)
 	correct = 0
 	wrong = 0
 	for i in range(len(test_data)):
-		result = clf2.predict(test_data[i])
+		result = rf.predict(test_data[i])
 		if result == results_test[i]:
 			correct = correct + 1
 			print 'Correct : ' + str(result)
@@ -207,6 +209,7 @@ def temp_classifier():
 	accuracy = (float(correct))/(float(correct) + float(wrong))
 	print 'Accuracy : ' + str(accuracy)
 	'''
+
 def classifier(training_data,results):
 	test_data = training_data[-50:]
 	training_data = training_data[:-50]
@@ -276,9 +279,9 @@ A.get_match_details()
 '''
 
 
-get_match_recursively()
-apsched.add_job(get_match_recursively, trigger='interval', seconds=1800)
-apsched.start() # will block
+#get_match_recursively()
+#apsched.add_job(get_match_recursively, trigger='interval', seconds=1800)
+#apsched.start() # will block
 
 
 '''
@@ -287,7 +290,7 @@ training_data,results = construct_training_data(x)
 classifier(training_data,results)
 '''
 
-#temp_classifier()
+temp_classifier()
 
 
 
