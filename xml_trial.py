@@ -3,9 +3,11 @@ import xml.etree.ElementTree as ET
 from apscheduler.schedulers.blocking import BlockingScheduler
 from sklearn import svm, linear_model
 from sklearn import cross_validation
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, ExtraTreesClassifier, AdaBoostClassifier
 
 rf = RandomForestClassifier(n_estimators=10, max_depth=None,min_samples_split=1, random_state=0)
+et = ExtraTreesClassifier()
+ab = AdaBoostClassifier()
 clf2 = svm.LinearSVC()
 clf = svm.SVC()
 logreg = linear_model.LogisticRegression(C=1e5)
@@ -22,6 +24,8 @@ file_handler_match_id = open('match_ids.txt','r')
 #file_handler_features = open('match_features.csv','a')
 file_handler_features = open('match_features.csv','r')
 
+file_handler_features_heroes = open('match_features_heroes.csv','a')
+
 #file_handler_features.writelines('Duration,tower_status_dire,tower_status_radiant,barracks_status_dire,barracks_status_radiant,radiant_win,first_blood_time,heroes')
 #file_handler_features.writelines('\n')
 
@@ -35,7 +39,7 @@ class Match():
 	def __init__(self):
 		self.match_duration = 0 # Duration of the match in seconds.
 		self.match_winner = 0 # 1 if Radiant Victory or 0 if Dire Victory.
-		self.radiant_heroes = [] # Dictionary of hero vs characteristics (GPM,XPM,KDA) Single Metric?  
+		self.radiant_heroes = {} # Dictionary of hero vs characteristics (GPM,XPM,KDA) Single Metric?  
 		self.tower_status_radiant = 0
 		self.tower_status_dire = 0
 		self.barracks_status_radiant = 0
@@ -51,6 +55,7 @@ class Match():
 		url_content = url_content.read()
 		self.parse_match(url_content)
 
+
 	def parse_match(self,xml_content):
 		root = ET.fromstring(xml_content)
 		for child in root:
@@ -65,34 +70,64 @@ class Match():
 					print 'Match Took : ' + str(float(duration)/60) + ' Minutes'
 					self.match_duration = duration
 					self.valid = True
-					file_handler_features.write(str(duration) + ',')
+					file_handler_features_heroes.write(str(duration) + ',')
 			elif child.tag == 'tower_status_dire':
 				self.tower_status_dire = int(child.text)
-				file_handler_features.write(str(child.text) + ',')
+				file_handler_features_heroes.write(str(child.text) + ',')
 			elif child.tag == 'tower_status_radiant':
 				self.tower_status_radiant = int(child.text)
-				file_handler_features.write(str(child.text) + ',')
+				file_handler_features_heroes.write(str(child.text) + ',')
 			elif child.tag == 'barracks_status_dire':
 				self.barracks_status_dire = int(child.text)
-				file_handler_features.write(str(child.text) + ',')
+				file_handler_features_heroes.write(str(child.text) + ',')
 			elif child.tag == 'barracks_status_radiant':
 				self.barracks_status_radiant = int(child.text)
-				file_handler_features.write(str(child.text) + ',')
+				file_handler_features_heroes.write(str(child.text) + ',')
 			elif child.tag == 'radiant_win':
 				if child.text == 'true':
 					self.match_winner = 1
-					file_handler_features.write(str(1) + ',')
+					file_handler_features_heroes.write(str(1) + ',')
 				else:
 					self.match_winner = 0
-					file_handler_features.write(str(0) + ',')
+					file_handler_features_heroes.write(str(0) + ',')
 			elif child.tag == 'first_blood_time':
 				self.first_blood_time = int(child.text)
-				file_handler_features.write(str(child.text) + ',')
+				file_handler_features_heroes.write(str(child.text) + ',')
 			for child1 in child:
+				curr_hero_stuff = []
 				for player in child1:
 					if player.tag == 'hero_id':
-						self.radiant_heroes.append(int(player.text))
-						file_handler_features.write(str(player.text) + ',')
+						#self.radiant_heroes.append(int(player.text))
+						file_handler_features_heroes.write(str(player.text) + ',')
+						curr_hero_stuff.append(player.text)
+					if player.tag == 'kills':
+						curr_hero_stuff.append(player.text)
+						file_handler_features_heroes.write(str(player.text) + ',')
+					if player.tag == 'deaths':
+						curr_hero_stuff.append(player.text)
+						file_handler_features_heroes.wrtie(str(player.text) + ',')
+					if player.tag == 'assists':
+						curr_hero_stuff.append(player.text)
+						file_handler_features_heroes.wrtie(str(player.text) + ',')
+					if player.tag == 'gold_per_minute':
+						curr_hero_stuff.append(player.text)
+						file_handler_features_heroes.wrtie(str(player.text) + ',')
+					if player.tag == 'xp_per_minute':
+						curr_hero_stuff.append(player.text)
+						file_handler_features_heroes.wrtie(str(player.text) + ',')
+					if player.tag == 'level':
+						curr_hero_stuff.append(player.text)
+						file_handler_features_heroes.wrtie(str(player.text) + ',')
+					if player.tag == 'hero_damage':
+						curr_hero_stuff.append(player.text)
+						file_handler_features_heroes.wrtie(str(player.text) + ',')
+					if player.tag == 'assists':
+						curr_hero_stuff.append(player.text)
+						file_handler_features_heroes.wrtie(str(player.text) + ',')
+				self.radiant_heroes.append(curr_hero_stuff)
+
+
+
 
 
 def fetch_match_ids():
@@ -104,8 +139,8 @@ def populate_match_details():
 	match_ids = fetch_match_ids()
 	print match_ids
 	matches = []
-	match_ids = match_ids[6550:]
-	match_counter = 6500
+	match_ids = match_ids[:]
+	match_counter = 1
 	for match_id in match_ids:
 		print 'Parsing match : ' + str(match_counter)
 		temp_match = Match()
@@ -121,7 +156,7 @@ def populate_match_details():
 		print 'barracks_status_dire	: ' + str(temp_match.barracks_status_dire)
 		print 'tower_status_radiant : ' + str(temp_match.tower_status_radiant)
 		print 'tower_status_dire : ' + str(temp_match.tower_status_dire)
-		file_handler_features.write('\n')
+		file_handler_features_heroes.write('\n')
 		match_counter = match_counter + 1
 	return matches
 
@@ -151,8 +186,40 @@ def leave_one_out(training_data,test_point,results,test_result):
 	else:
 		return False
 
+def accuracy_train_size(training_data,results):
+	test_data = training_data[-int(0.3*len(training_data)):]
+	results_test = results[-int(0.3*len(results)):]
+	training_data = training_data[:-int(0.3*len(training_data))]
+	results = results[:-int(0.3*len(results))]
+	for i in range(200,len(training_data),10):
+		correct = 0
+		wrong = 0
+		temp_training = training_data[:i]
+		temp_results = results[:i]
+		rf.fit(temp_training,temp_results)
+		for j in range(len(test_data)):
+			result = rf.predict(test_data[j])
+			if result == results_test[j]:
+				correct = correct + 1
+			else:
+				wrong  = wrong + 1
+		print correct,wrong
+		accuracy = (float(correct))/(float(correct) + float(wrong))
+		print 'Testing Accuracy : ' + str(accuracy)
+		for j in range(len(temp_training)):
+			result = rf.predict(temp_training[j])
+			if result == temp_results[j]:
+				correct = correct + 1
+			else:
+				wrong  = wrong + 1
+		print correct,wrong
+		accuracy = (float(correct))/(float(correct) + float(wrong))
+		print 'Training Accuracy : ' + str(accuracy)
+
+		
+
 def temp_classifier():
-	x = file_handler_features.readlines()
+	x = file_handler_features_heroes.readlines()
 	training_data = []
 	results = []
 	del x[0]
@@ -174,12 +241,15 @@ def temp_classifier():
 		results.append(int(line[10]))
 	correct = 0
 	wrong = 0
+	#accuracy_train_size(training_data,results)
+	'''
 	for i in range(len(training_data)):
 		print 'Iteration : ' + str(i)
 		test_point = training_data[i]
 		test_result = results[i]
 		remaining_training = [training_data[j] for j in range(len(training_data)) if i!=j]
 		remaining_results = [results[j] for j in range(len(results)) if i!=j]
+		print len(remaining_training)
 		result = leave_one_out(remaining_training,test_point,remaining_results,test_result)
 		if result == True:
 			print 'True'
@@ -190,15 +260,16 @@ def temp_classifier():
 		accuracy = (float(correct))/(float(correct) + float(wrong))
 		print 'Accuracy : ' + str(accuracy)
 	'''
+
 	test_data = training_data[-int(0.3*len(training_data)):]
 	training_data = training_data[:-int(0.3*len(training_data))]
 	results_training = results[:-int(0.3*len(results))]
 	results_test = results[-int(0.3*len(results)):]
-	rf.fit(training_data,results_training)
+	et.fit(training_data,results_training)
 	correct = 0
 	wrong = 0
 	for i in range(len(test_data)):
-		result = rf.predict(test_data[i])
+		result = et.predict(test_data[i])
 		if result == results_test[i]:
 			correct = correct + 1
 			print 'Correct : ' + str(result)
@@ -208,7 +279,7 @@ def temp_classifier():
 	print correct,wrong
 	accuracy = (float(correct))/(float(correct) + float(wrong))
 	print 'Accuracy : ' + str(accuracy)
-	'''
+
 
 def classifier(training_data,results):
 	test_data = training_data[-50:]
@@ -279,9 +350,9 @@ A.get_match_details()
 '''
 
 
-#get_match_recursively()
-#apsched.add_job(get_match_recursively, trigger='interval', seconds=1800)
-#apsched.start() # will block
+get_match_recursively()
+apsched.add_job(get_match_recursively, trigger='interval', seconds=1200)
+apsched.start() # will block
 
 
 '''
@@ -290,7 +361,7 @@ training_data,results = construct_training_data(x)
 classifier(training_data,results)
 '''
 
-temp_classifier()
+#temp_classifier()
 
 
 
