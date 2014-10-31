@@ -39,7 +39,7 @@ class Match():
 	def __init__(self):
 		self.match_duration = 0 # Duration of the match in seconds.
 		self.match_winner = 0 # 1 if Radiant Victory or 0 if Dire Victory.
-		self.radiant_heroes = {} # Dictionary of hero vs characteristics (GPM,XPM,KDA) Single Metric?  
+		self.radiant_heroes = [] # Dictionary of hero vs characteristics (GPM,XPM,KDA) Single Metric?  
 		self.tower_status_radiant = 0
 		self.tower_status_dire = 0
 		self.barracks_status_radiant = 0
@@ -65,7 +65,7 @@ class Match():
 					print 'Match Took : ' + str(float(duration)/60) + ' Minutes'
 					self.valid = False
 					self.match_duration = duration
-					file_handler_features.write(str(duration) + ',')
+					file_handler_features_heroes.write(str(duration) + ',')
 				else :
 					print 'Match Took : ' + str(float(duration)/60) + ' Minutes'
 					self.match_duration = duration
@@ -105,29 +105,61 @@ class Match():
 						file_handler_features_heroes.write(str(player.text) + ',')
 					if player.tag == 'deaths':
 						curr_hero_stuff.append(player.text)
-						file_handler_features_heroes.wrtie(str(player.text) + ',')
+						file_handler_features_heroes.write(str(player.text) + ',')
 					if player.tag == 'assists':
 						curr_hero_stuff.append(player.text)
-						file_handler_features_heroes.wrtie(str(player.text) + ',')
-					if player.tag == 'gold_per_minute':
+						file_handler_features_heroes.write(str(player.text) + ',')
+					if player.tag == 'gold_per_min':
 						curr_hero_stuff.append(player.text)
-						file_handler_features_heroes.wrtie(str(player.text) + ',')
-					if player.tag == 'xp_per_minute':
+						file_handler_features_heroes.write(str(player.text) + ',')
+					if player.tag == 'xp_per_min':
 						curr_hero_stuff.append(player.text)
-						file_handler_features_heroes.wrtie(str(player.text) + ',')
+						file_handler_features_heroes.write(str(player.text) + ',')
 					if player.tag == 'level':
 						curr_hero_stuff.append(player.text)
-						file_handler_features_heroes.wrtie(str(player.text) + ',')
+						file_handler_features_heroes.write(str(player.text) + ',')
 					if player.tag == 'hero_damage':
 						curr_hero_stuff.append(player.text)
-						file_handler_features_heroes.wrtie(str(player.text) + ',')
+						file_handler_features_heroes.write(str(player.text) + ',')
 					if player.tag == 'assists':
 						curr_hero_stuff.append(player.text)
-						file_handler_features_heroes.wrtie(str(player.text) + ',')
+						file_handler_features_heroes.write(str(player.text) + ',')
 				self.radiant_heroes.append(curr_hero_stuff)
 
 
 
+
+def populate_hero_stats():
+	feature_content = file_handler_features_heroes.readlines()
+	hero_dict = {}
+	for line in feature_content:
+		line = line.strip()
+		line = line.split(',')
+		if len(line) > 100:
+			continue
+		hero_data = line[:90]
+		hero_data=[hero_data[x:x+9] for x in xrange(0, len(hero_data), 9)]
+		for hero in hero_data:
+			hero_id = hero[0]
+			if hero_id not in hero_dict:
+				hero_dict[hero_id] = []
+			kills = hero[1]
+			deaths = hero[2]
+			assists = hero[3]
+			gpm = hero[5]
+			xpm = hero[6]
+			hero_damage = hero[7]
+			level = hero[8]
+			feature = float(kills) - float(deaths) + (float(assists)/2) + float(gpm)/100 + float(xpm)/100 + float(hero_damage)/10000 + float(level)
+			hero_dict[hero_id].append(feature)
+
+	parallel_hero_dict = {}
+	for hero in hero_dict:
+		hero_stats = hero_dict[hero]
+		hero_stat = float(sum(hero_stats))/len(hero_stats)
+		parallel_hero_dict[hero] = hero_stat
+
+	return parallel_hero_dict
 
 
 def fetch_match_ids():
@@ -139,8 +171,10 @@ def populate_match_details():
 	match_ids = fetch_match_ids()
 	print match_ids
 	matches = []
-	match_ids = match_ids[:]
-	match_counter = 1
+	print len(match_ids)
+	print match_ids[7631]
+	match_ids = match_ids[7631:]
+	match_counter = 7631
 	for match_id in match_ids:
 		print 'Parsing match : ' + str(match_counter)
 		temp_match = Match()
@@ -218,8 +252,71 @@ def accuracy_train_size(training_data,results):
 
 		
 
-def temp_classifier():
+def temp_classifier_heroes(hero_dict):
 	x = file_handler_features_heroes.readlines()
+	training_data = []
+	results = []
+	del x[0]
+	for line in x:
+		line = line.strip()
+		line = line.split(',')
+		#print line
+		item = line[:10]
+		duration = int(line[11])
+		if duration < 1200 or len(line) >= 20:
+			continue
+		item = [int(item[i]) for i in range(len(item))]
+		feature_vector = [0 for i in range(231)]
+		for hero in item[:5]:
+			feature_vector[hero] = 1
+		for hero in item[5:]:
+			feature_vector[hero+110] = 1
+		training_data.append(feature_vector)
+		results.append(int(line[10]))
+	correct = 0
+	wrong = 0
+	#accuracy_train_size(training_data,results)
+	'''
+	for i in range(len(training_data)):
+		print 'Iteration : ' + str(i)
+		test_point = training_data[i]
+		test_result = results[i]
+		remaining_training = [training_data[j] for j in range(len(training_data)) if i!=j]
+		remaining_results = [results[j] for j in range(len(results)) if i!=j]
+		print len(remaining_training)
+		result = leave_one_out(remaining_training,test_point,remaining_results,test_result)
+		if result == True:
+			print 'True'
+			correct = correct + 1
+		else:
+			print 'False'
+			wrong = wrong + 1
+		accuracy = (float(correct))/(float(correct) + float(wrong))
+		print 'Accuracy : ' + str(accuracy)
+	'''
+
+	test_data = training_data[-int(0.3*len(training_data)):]
+	training_data = training_data[:-int(0.3*len(training_data))]
+	results_training = results[:-int(0.3*len(results))]
+	results_test = results[-int(0.3*len(results)):]
+	et.fit(training_data,results_training)
+	correct = 0
+	wrong = 0
+	for i in range(len(test_data)):
+		result = et.predict(test_data[i])
+		if result == results_test[i]:
+			correct = correct + 1
+			print 'Correct : ' + str(result)
+		else:
+			wrong  = wrong + 1
+			print 'Wrong : ' + str(result)
+	print correct,wrong
+	accuracy = (float(correct))/(float(correct) + float(wrong))
+	print 'Accuracy : ' + str(accuracy)
+
+
+def temp_classifier():
+	x = file_handler_features.readlines()
 	training_data = []
 	results = []
 	del x[0]
@@ -349,17 +446,19 @@ A.match_id = '27110133'
 A.get_match_details()
 '''
 
-
+'''
 get_match_recursively()
 apsched.add_job(get_match_recursively, trigger='interval', seconds=1200)
 apsched.start() # will block
-
-
 '''
+
+
 x = populate_match_details()
 training_data,results = construct_training_data(x)
 classifier(training_data,results)
-'''
+
+
+#populate_hero_stats()
 
 #temp_classifier()
 
