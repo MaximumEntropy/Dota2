@@ -2,3 +2,7 @@ mid_term_repot/*.log
 mid_term_repot/*.pdf
 mid_term_repot/*.out
 mid_term_repot/*.aux
+.project
+.pydevproject
+*.pyc
+
