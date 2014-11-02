@@ -452,15 +452,15 @@ apsched.add_job(get_match_recursively, trigger='interval', seconds=1200)
 apsched.start() # will block
 '''
 
-
+'''
 x = populate_match_details()
 training_data,results = construct_training_data(x)
 classifier(training_data,results)
-
+'''
 
 #populate_hero_stats()
 
-#temp_classifier()
+temp_classifier()
 
 
 

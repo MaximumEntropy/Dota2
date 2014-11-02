@@ -25,7 +25,7 @@ def parse_match_list(xml_content):
 		return match_ids, ''
 
 
-def parse_match(xml_content,match_object):
+def parse_match(xml_content,match_object,file_handler_features_heroes):
 	root = ET.fromstring(xml_content)
 	for child in root:
 		if child.tag == 'duration':

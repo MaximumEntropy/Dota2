@@ -1,7 +1,8 @@
 import xml_parser
 import urllib
+import xml.etree.ElementTree as ET
 
-file_handler_match_id = open('match_ids.txt','a')
+file_handler_match_id = open('match_ids.txt','r')
 #file_handler_features = open('match_features.csv','a')
 file_handler_features = open('match_features.csv','r')
 
@@ -34,14 +35,14 @@ class Match():
 		self.valid = True
 
 
-	def get_match_details(self):
+	def get_match_details(self,file_handler_features_heroes):
 		match_url = MATCH_REQUEST_URL + self.match_id + '&key=' + API_KEY + '&format=XML'
 		url_content = urllib.urlopen(match_url)
 		url_content = url_content.read()
-		self.parse_match(url_content)
+		self.parse_match(url_content,file_handler_features_heroes)
 
 
-	def parse_match(self,xml_content):
+	def parse_match(self,xml_content,file_handler_features_heroes):
 		root = ET.fromstring(xml_content)
 		for child in root:
 			if child.tag == 'duration':
@@ -111,11 +112,11 @@ class Match():
 						file_handler_features_heroes.write(str(player.text) + ',')
 				self.radiant_heroes.append(curr_hero_stuff)
 
-def get_match_recursively():
+def get_match_recursively(file_handler_match_id,file_handler_features_heroes):
 	match_list_url = GAMES_REQUEST_URL + API_KEY + '&skill=3'
 	url_content = urllib.urlopen(match_list_url)
 	url_buffer = url_content.read()
-	match_ids,last_match = parse_match_list(url_buffer)
+	match_ids,last_match = xml_parser.parse_match_list(url_buffer,file_handler_features_heroes)
 	for match_id in match_ids:
 		file_handler_match_id.write(str(match_id) + '\n')
 	for i in range(10000):
@@ -130,19 +131,19 @@ def get_match_recursively():
 		if last_match == '':
 			return
 
-def fetch_match_ids():
+def fetch_match_ids(file_handler_match_id):
 	match_ids = file_handler_match_id.readlines()
 	match_ids = list(set(match_ids))
 	return match_ids
 
-def populate_match_details():
-	match_ids = fetch_match_ids()
+def populate_match_details(file_handler_match_id):
+	match_ids = fetch_match_ids(file_handler_match_id)
 	print match_ids
 	matches = []
 	print len(match_ids)
-	print match_ids[7252]
-	match_ids = match_ids[7252:]
-	match_counter = 7252
+	print match_ids[7908]
+	match_ids = match_ids[7908:]
+	match_counter = 7908
 	for match_id in match_ids:
 		print 'Parsing match : ' + str(match_counter)
 		temp_match = Match()

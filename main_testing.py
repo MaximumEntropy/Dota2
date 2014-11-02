@@ -8,12 +8,20 @@ import fetcher
 import xml_parser
 import classifier
 
+file_handler_match_id = open('match_ids.txt','r')
+#file_handler_features = open('match_features.csv','a')
+file_handler_features = open('match_features.csv','r')
+
+file_handler_features_heroes = open('match_features_heroes.csv','r')
+
+'''
 fetcher.get_match_recursively()
 apsched.add_job(fetcher.get_match_recursively, trigger='interval', seconds=1200)
 apsched.start() # will block
+'''
 
 #x = fetcher.populate_match_details()
 
-#classifier.classify()
+classifier.classify(file_handler_features_heroes,file_handler_features)
 
 
