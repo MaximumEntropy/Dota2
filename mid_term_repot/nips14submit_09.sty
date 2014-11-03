@@ -89,25 +89,16 @@
 \def\@maketitle{\vbox{\hsize\textwidth
 \linewidth\hsize \vskip 0.1in \toptitlebar \centering
 {\LARGE\bf \@title\par}  \bottomtitlebar % \vskip 0.1in %  minus
-\ifnipsfinal
-   \def\And{\end{tabular}\hfil\linebreak[0]\hfil
-            \begin{tabular}[t]{c}\bf\rule{\z@}{24pt}\ignorespaces}% 
-  \def\AND{\end{tabular}\hfil\linebreak[4]\hfil
-            \begin{tabular}[t]{c}\bf\rule{\z@}{24pt}\ignorespaces}% 
-    \begin{tabular}[t]{c}\bf\rule{\z@}{24pt}\@author\end{tabular}% 
-\else
-\begin{tabular}[t]{c}\bf\rule{\z@}{24pt}
-Anonymous Author(s) \\
-Affiliation \\
-Address \\
-City, State/Province, Postal Code, Country \\
-\texttt{email} \\
-\end{tabular}% 
-\fi
+\def\And{\end{tabular}\hfil\linebreak[0]\hfil
+  \begin{tabular}[t]{c}\bf\rule{\z@}{24pt}\ignorespaces}% 
+\def\AND{\end{tabular}\hfil\linebreak[4]\hfil
+  \begin{tabular}[t]{c}\bf\rule{\z@}{24pt}\ignorespaces}% 
+  \begin{tabular}[t]{c}\bf\rule{\z@}{24pt}\@author\end{tabular}% 
+
 \vskip 0.3in minus 0.1in}}
 
 \renewenvironment{abstract}{\vskip.075in\centerline{\large\bf
-Abstract}\vspace{0.5ex}\begin{quote}}{\par\end{quote}\vskip 1ex}
+10-701: Machine Learning Mid-Term Report}\vspace{0.5ex}\begin{quote}}{\par\end{quote}\vskip 1ex}
 
 % sections with less space
 \def\section{\@startsection {section}{1}{\z@}{-2.0ex plus
