@@ -11,9 +11,9 @@ rf = RandomForestClassifier(n_estimators=10, max_depth=None,min_samples_split=1,
 et = ExtraTreesClassifier()
 ab = AdaBoostClassifier()
 clf2 = svm.LinearSVC()
-clf = svm.SVC(kernel='rbf')
+clf = svm.SVC(kernel='poly')
 logreg = linear_model.LogisticRegression(C=1e5)
-knn = KNeighborsClassifier()
+knn = KNeighborsClassifier(n_neighbors=5)
 nc = NearestCentroid()
 
 def populate_hero_stats(file_handler_features_heroes):
@@ -71,6 +71,16 @@ def compute_f_score(training_data,results):
 	train_sizes,train_scores,valid_scores = learning_curve(RandomForestClassifier(n_estimators=10, max_depth=None,min_samples_split=1, random_state=0), training_data, results, train_sizes=[1, 0.9, 0.8], cv=5)
 	print train_scores
 	print valid_scores
+
+def hold_out(training_data,results):
+	print 'Length : ' + str(len(training_data))
+	test_data = training_data[-int(0.3*len(training_data)):]
+	training_data = training_data[:-int(0.3*len(training_data))]
+	results_training = results[:-int(0.3*len(results))]
+	results_test = results[-int(0.3*len(results)):]
+	clf.fit(training_data,results_training)
+	print clf.score(test_data,results_test)
+	print clf.score(training_data,results_training)
 
 def hold_out_training(training_data,results):
 	print 'Length : ' + str(len(training_data))
@@ -199,6 +209,9 @@ def leave_one_out_classifier(training_data,results):
 def extract_features(file_handler_features,hero_dict):
 	file_handler_features.seek(0)
 	x = file_handler_features.readlines()
+	print len(x)
+	x = list(set(x))
+	print len(x)
 	training_data = []
 	results = []
 	del x[0]
@@ -263,8 +276,8 @@ def extract_features_simple(file_handler_features,hero_dict):
 def classify(file_handler_features_heroes,file_handler_features):
 	hero_dict = populate_hero_stats(file_handler_features_heroes)
 	training_data,results = extract_features(file_handler_features,hero_dict)
-	training_data_simple,results_simple = extract_features_simple(file_handler_features,hero_dict)
+	#training_data_simple,results_simple = extract_features_simple(file_handler_features,hero_dict)
 	#training_data_1,results_1 = extract_features_heroes(file_handler_features_heroes,hero_dict)
 	#leave_one_out_classifier(training_data,results)
 	#leave_one_out_classifier(training_data_simple,results_simple)
-	hold_out_training(training_data,results)
+	hold_out(training_data,results)

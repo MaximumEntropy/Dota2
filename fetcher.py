@@ -136,6 +136,21 @@ def fetch_match_ids(file_handler_match_id):
 	match_ids = list(set(match_ids))
 	return match_ids
 
+
+def get_xml_games(file_handler_match_id):
+	match_ids = fetch_match_ids(file_handler_match_id)
+	match_counter = 9134
+	match_ids = match_ids[:]
+	for match in match_ids:
+		print 'Iteration : ' + str(match_counter)
+		match_url = MATCH_REQUEST_URL + str(match) + '&key=' + API_KEY + '&format=XML'
+		url_content = urllib.urlopen(match_url)
+		url_content = url_content.read()
+		f = open('Matches/'+ str(match_counter)+'.xml','w')
+		f.write(url_content)
+		f.close()
+		match_counter = match_counter + 1
+
 def populate_match_details(file_handler_match_id):
 	match_ids = fetch_match_ids(file_handler_match_id)
 	print match_ids
