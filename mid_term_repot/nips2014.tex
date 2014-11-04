@@ -9,9 +9,7 @@
 
 
 \author{
-Sandeep Subramanian\thanks{ Use footnote for providing further information
-about author (webpage, alternative address)---\emph{not} for acknowledging
-funding agencies.} \\
+Sandeep Subramanian\\
 \texttt{sandeeps@cs.cmu.edu} \\
 \And
 Manu Bhargava Reddy Mnannuri\\
@@ -41,13 +39,20 @@ Manu Bhargava Reddy Mnannuri\\
 
 \section{Objective and Goals}
 State the updated version of the research question, based on results so far. \\
+
 Is it well-formed and interesting? \\
+Yes, 
 Are there well-defined metrics for success?\\
 Is the minimum goal achievable in the remaining time? \\
 Are the stretch goals interesting?\\
 
+
+The objective of our project is to improve the performance of extant approaches to predicting the outcome of Dota 2 matches. Extant approaches involve using solely the heroes that are picked by either team. The approach uses binary features about whether a player picked a hero or not. Our research is focussed on using a wider range of statistics offered by the Dota2API to model synergistic and antagonistic relations between heroes. We believe such an approach would give us better results compared to a naive representation of a heros presence alone. 
+
 \section{DataSet}
 Is the data set completely ready (in-hand, loaded onto a machine, analyzed for outliers or other problems)?\\ Have some main features of the data set been characterized (either visually or statistically)?
+
+We have collected almost 12000 matches using the Dota2API. This API places a limit on the number of matches that we could fetch in a single day. We plan to get as many as 50000 matches to try out different ideas. We have written code to parse the match information and produce features to meet the base line. 
 
 \section{MileStones}
 Were the first steps described in the project proposal completed?\\
