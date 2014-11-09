@@ -1,8 +1,62 @@
 file_handler_feature_vectors = open('feature_vectors.csv','w')
 file_handler_feature_vectors_heroes = open('feature_vectors_heroes.csv','w')
+file_handler_feature_vectors_reverse = open('feature_vectors_reverse.csv','w')
+file_handler_feature_vectors_heroes_reverse = open('feature_vectors_heroes_reverse.csv','w')
 file_handler_xml_extracted = open('features_local.csv','r')
+file_handler_regression_features = open('features_regression.csv','w')
 lines = file_handler_xml_extracted.readlines()
 lines = list(set(lines))
+def populate_regression_features():
+	for line in lines:
+		line = line.strip()
+		line = line.split(',')
+		del line[-1]
+		line = [int(z) for z in line]
+		hero_data = line[:80]
+		hero_data=[hero_data[x:x+8] for x in xrange(0, len(hero_data), 8)]
+		hero_ids = [temp[0] for temp in hero_data]
+		if len(hero_data) < 10:
+			continue
+		result = int(line[80])
+		if result == 0:
+			result = -1
+		duration = int(line[81])
+		if duration < 1200:
+			continue
+		all_kills = [temp[1] for temp in hero_data]
+		radiant = all_kills[:5]
+		dire = all_kills[5:]
+		diff_kills = abs(sum(radiant)-sum(dire))
+		all_assists = [temp[3] for temp in hero_data]
+		radiant = all_assists[:5]
+		dire = all_assists[5:]
+		diff_assists = abs(sum(radiant)-sum(dire))
+		all_gpm = [temp[4] for temp in hero_data]
+		radiant = all_gpm[:5]
+		dire = all_gpm[5:]
+		diff_gpm = abs(sum(radiant)-sum(dire))
+		all_xpm = [temp[5] for temp in hero_data]
+		radiant = all_xpm[:5]
+		dire = all_xpm[5:]
+		diff_xpm = abs(sum(radiant)-sum(dire))
+		all_levels = [temp[7] for temp in hero_data]
+		radiant = all_levels[:5]
+		dire = all_levels[5:]
+		diff_levels = abs(sum(radiant)-sum(dire))
+		print diff_kills,diff_assists,diff_gpm,diff_xpm,diff_levels
+		margin = float(diff_kills) + float(diff_assists)/2.0 + float(diff_gpm)/100 + float(diff_xpm)/100 + float(diff_levels) + (1.0/duration) * 100000
+		margin = margin * result
+		feature_vector = [0 for i in range(221)]
+		for hero in hero_ids[:5]:
+			feature_vector[int(hero)] = 1
+		for hero in hero_ids[5:]:
+			feature_vector[int(hero)+110] = 1
+		feature_vector.append(margin)
+		for item in feature_vector:
+			file_handler_regression_features.write(str(item) + ',')
+		file_handler_regression_features.write('\n')
+
+
 def populate_hero_stats(feature_content):
 	hero_dict = {}
 	for line in feature_content:
@@ -47,30 +101,70 @@ for line in lines:
 	if int(duration) < 1200:
 		continue
 	feature_vector = [0 for i in range(221)]
+	feature_vector_reverse = [0 for i in range(221)]
 	for hero in hero_ids[:5]:
 		feature_vector[int(hero)] = 1
 	for hero in hero_ids[5:]:
 		feature_vector[int(hero)+110] = 1
+
+	for hero in hero_ids[5:]:
+		feature_vector_reverse[int(hero)] = 1
+	for hero in hero_ids[:5]:
+		feature_vector_reverse[int(hero)+110] = 1
+	
 	feature_vector.append(str(result))
+	print result
+	if result == 1:
+		inv_result = 0
+	else:
+		inv_result = 1
+	feature_vector_reverse.append(str(inv_result))
+
 	for item in feature_vector:
 		file_handler_feature_vectors.write(str(item) + ',')
 	file_handler_feature_vectors.write('\n')
+
+	for item in feature_vector_reverse:
+		file_handler_feature_vectors_reverse.write(str(item) + ',')
+	file_handler_feature_vectors_reverse.write('\n')
+
 	feature_vector = [0 for i in range(231)]
+	feature_vector_reverse = [0 for i in range(231)]
 	counter = 0
 	for hero in hero_ids[:5]:
 		feature_vector[int(hero)] = 1
-		feature_vector[221+counter] = hero_dict[hero]
+		feature_vector[221+counter] = hero_dict[hero]/float(50)
 		counter = counter + 1
 	for hero in hero_ids[5:]:
 		feature_vector[int(hero)+110] = 1
-		feature_vector[221+counter] = hero_dict[hero]
+		feature_vector[221+counter] = hero_dict[hero]/float(50)
 		counter = counter + 1
+
+	counter = 0
+	for hero in hero_ids[5:]:
+		feature_vector_reverse[int(hero)] = 1
+		feature_vector_reverse[221+counter] = hero_dict[hero]/float(50)
+		counter = counter + 1
+	for hero in hero_ids[:5]:
+		feature_vector_reverse[int(hero)+110] = 1
+		feature_vector_reverse[221+counter] = hero_dict[hero]/float(50)
+		counter = counter + 1
+
 	feature_vector.append(str(result))
+	feature_vector_reverse.append(str(inv_result))
+
 	for item in feature_vector:
 		file_handler_feature_vectors_heroes.write(str(item) + ',')
-
 	file_handler_feature_vectors_heroes.write('\n')
+
+	for item in feature_vector_reverse:
+		file_handler_feature_vectors_heroes_reverse.write(str(item) + ',')
+	file_handler_feature_vectors_heroes_reverse.write('\n')
+	
 	match_counter = match_counter + 1
+
+
+populate_regression_features()
 
 
 

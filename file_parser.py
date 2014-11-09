@@ -5,7 +5,11 @@ match_number = 1
 for file_name in os.listdir('Matches'):
 	print 'Match Number : ' + str(match_number)
 	if file_name[-3:] == 'xml':
-		tree = ET.parse('Matches/'+file_name)
+		try:
+			tree = ET.parse('Matches/'+file_name)
+		except ET.ParseError:
+			print 'Parse Failed!!'
+			continue
 		root = tree.getroot()
 		for child in root:
 			if child.tag == 'duration':
@@ -22,7 +26,7 @@ for file_name in os.listdir('Matches'):
 			elif child.tag == 'radiant_win':
 				if child.text == 'true':
 					file_handler_features_heroes.write(str(1) + ',')
-				else:
+				elif child.text == 'false':
 					file_handler_features_heroes.write(str(0) + ',')
 			elif child.tag == 'first_blood_time':
 				file_handler_features_heroes.write(str(child.text) + ',')

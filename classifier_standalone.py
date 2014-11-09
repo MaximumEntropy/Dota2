@@ -2,16 +2,41 @@ from sklearn import svm, linear_model
 from sklearn import cross_validation
 from sklearn.ensemble import RandomForestClassifier, ExtraTreesClassifier, AdaBoostClassifier
 from sklearn.neighbors import KNeighborsClassifier, NearestCentroid
+from sklearn.neural_network import BernoulliRBM
+from sklearn.pipeline import Pipeline
+from sklearn.linear_model import SGDClassifier, Perceptron
+from sklearn.naive_bayes import GaussianNB, MultinomialNB, BernoulliNB
+from sklearn.metrics import precision_recall_fscore_support
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.ndimage import convolve
+from sklearn import linear_model, datasets, metrics
+from sklearn.cross_validation import train_test_split
+from sklearn.neural_network import BernoulliRBM
+from sklearn.pipeline import Pipeline
+import random
+import plots
 
-rf = RandomForestClassifier(n_estimators=10, max_depth=None,min_samples_split=1, random_state=0)
+model = BernoulliRBM(n_components=2)
+rf = RandomForestClassifier(n_estimators=5, max_depth=None,min_samples_split=1, random_state=0)
 et = ExtraTreesClassifier()
 ab = AdaBoostClassifier()
 clf2 = svm.LinearSVC()
-clf = svm.SVC(kernel='poly')
-logreg = linear_model.LogisticRegression(C=1e5)
+clf = svm.SVC(kernel='linear')
+logreg = linear_model.LogisticRegression(C=0.5,penalty='l2')
 knn = KNeighborsClassifier(n_neighbors=5)
+sgdc = SGDClassifier()
+gnb = GaussianNB()
+mnb = MultinomialNB()
+bnb = BernoulliNB()
+prcp = Perceptron()
+rbm = BernoulliRBM(random_state=0, verbose=True)
+rbm.learning_rate = 0.1
+rbm.n_iter = 50
+rbm.n_components = 1000
 
-file_handler_features = open('feature_vectors.csv','r')
+classifier = Pipeline(steps=[('rbm', rbm), ('logreg', logreg)])
+file_handler_features = open('feature_vectors_heroes.csv','r')
 
 def unique(training_data,test_data):
 	for item in training_data:
@@ -20,42 +45,78 @@ def unique(training_data,test_data):
 
 def hold_out(training_data,results):
 	print 'Total Data : ' + str(len(training_data))
-	test_data = training_data[-int(0.3*len(training_data)):]
-	training_data = training_data[:-int(0.3*len(training_data))]
-	results_training = results[:-int(0.3*len(results))]
-	results_test = results[-int(0.3*len(results)):]
-	unique(training_data,test_data)
-	training_data = training_data[:20]
-	results_training = results_training[:20]
+	print sum(results);
+	test_data = training_data[-int(0.1*len(training_data)):]
+	training_data = training_data[:-int(0.1*len(training_data))]
+	results_training = results[:-int(0.1*len(results))]
+	results_test = results[-int(0.1*len(results)):]
+	zeros = 0
+	ones = 0
+	for item in results_training:
+		if item == 0:
+			zeros = zeros + 1
+		else:
+			ones = ones + 1
+	print zeros,ones
+	# unique(training_data,test_data)
 	print 'Training Items : ' + str(len(training_data))
 	print 'Test Items : ' + str(len(test_data))
-	ab.fit(training_data,results_training)
-	print ab.score(test_data,results_test)
-	print ab.score(training_data,results_training)
-	correct = 0
-	wrong = 0
-	for i in range(len(test_data)):
-		result = ab.predict(test_data[i])
-		if result == results_test[i]:
-			correct = correct + 1
-		else:
-			wrong = wrong + 1
-	Accuracy = (float(correct))/(float(correct)+float(wrong))
-	print 'Accuracy : ' + str(Accuracy)
+	training_scores_logreg = []
+	testing_scores_logreg = []
+	training_scores_svm = []
+	testing_scores_svm = []
+	training_scores_rf = []
+	testing_scores_rf = []
+	training_scores_bnb = []
+	testing_scores_bnb = []
+	#training_scores_knn = []
+	#testing_scores_knn = []
+	for i in range(1,len(training_data)/500):
+		logreg.fit(training_data[:i*500],results_training[:i*500])
+		testing_scores_logreg.append(logreg.score(test_data,results_test))
+		training_scores_logreg.append(logreg.score(training_data,results_training))
+		clf2.fit(training_data[:i*500],results_training[:i*500])
+		testing_scores_svm.append(clf2.score(test_data,results_test))
+		training_scores_svm.append(clf2.score(training_data,results_training))
+		rf.fit(training_data[:i*500],results_training[:i*500])
+		testing_scores_rf.append(rf.score(test_data,results_test))
+		training_scores_rf.append(rf.score(training_data,results_training))
+		bnb.fit(training_data[:i*500],results_training[:i*500])
+		testing_scores_bnb.append(bnb.score(test_data,results_test))
+		training_scores_bnb.append(bnb.score(training_data,results_training))
+		#logreg.fit(training_data[:i*500],results_training[:i*500])
+		#testing_scores_logreg.append(logreg.score(test_data,results_test))
+		#training_scores_logreg.append(logreg.score(training_data,results_training))
+	plots.plot(training_scores_logreg,testing_scores_logreg,training_scores_svm,testing_scores_svm ,training_scores_rf ,testing_scores_rf ,training_scores_bnb , testing_scores_bnb)
+	#rf.fit(training_data,results_training)
+	#print rf.score(test_data,results_test)
+	#print rf.score(training_data,results_training)
 
 lines = file_handler_features.readlines()
 lines = list(set(lines))
 results = []
 training_data = []
+all_data = []
 for line in lines:
 	line = line.strip()
 	line = line.split(',')
 	del line[-1]
-	line = [int(i) for i in line]
-	result = line[-2]
+	del line[0]
+	line = [float(i) for i in line]
+	#result = line[-1]
+	#results.append(result)
+	all_data.append(line)
+	#del line[-1]
+	#training_data.append(line)
+#print results
+#print all_data
+random.shuffle(all_data)
+for line in all_data:
+	result = line[-1]
 	results.append(result)
 	del line[-1]
 	training_data.append(line)
+
 
 hold_out(training_data,results)
 
