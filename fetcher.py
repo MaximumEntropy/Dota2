@@ -139,9 +139,9 @@ def fetch_match_ids(file_handler_match_id):
 
 def get_xml_games(file_handler_match_id):
 	match_ids = fetch_match_ids(file_handler_match_id)
-	match_counter = 17137
-	match_ids = match_ids[4358:]
+	match_counter = 38656
 	match_ids = list(set(match_ids))
+	match_ids = match_ids[21213:]
 	for match in match_ids:
 		print 'Iteration : ' + str(match_counter)
 		match_url = MATCH_REQUEST_URL + str(match) + '&key=' + API_KEY + '&format=XML'
@@ -157,9 +157,7 @@ def populate_match_details(file_handler_match_id):
 	print match_ids
 	matches = []
 	print len(match_ids)
-	print match_ids[7908]
-	match_ids = match_ids[7908:]
-	match_counter = 7908
+	match_counter = 1
 	for match_id in match_ids:
 		print 'Parsing match : ' + str(match_counter)
 		temp_match = Match()

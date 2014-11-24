@@ -9,11 +9,11 @@ import xml_parser
 import classifier
 
 file_handler_match_id = open('match_ids.txt','r')
-file_handler_match_id_manu = open('match_ids_manu_2.txt','r')
+file_handler_match_id_manu = open('post_mid_term_ids.txt','r')
 #file_handler_features = open('match_features.csv','a')
-file_handler_features = open('match_features.csv','r')
+file_handler_features = open('feature_vectors.csv','r')
 
-file_handler_features_heroes = open('match_features_heroes.csv','r')
+file_handler_features_heroes = open('feature_vectors_heroes.csv','r')
 
 '''
 fetcher.get_match_recursively()
@@ -23,8 +23,8 @@ apsched.start() # will block
 
 #x = fetcher.populate_match_details()
 
-#classifier.classify(file_handler_features_heroes,file_handler_features)
+classifier.classify(file_handler_features_heroes,file_handler_features)
 
-fetcher.get_xml_games(file_handler_match_id_manu)
+#fetcher.get_xml_games(file_handler_match_id_manu)
 
 

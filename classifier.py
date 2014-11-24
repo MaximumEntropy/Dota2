@@ -78,9 +78,9 @@ def hold_out(training_data,results):
 	training_data = training_data[:-int(0.3*len(training_data))]
 	results_training = results[:-int(0.3*len(results))]
 	results_test = results[-int(0.3*len(results)):]
-	clf.fit(training_data,results_training)
-	print clf.score(test_data,results_test)
-	print clf.score(training_data,results_training)
+	clf2.fit(training_data,results_training)
+	print clf2.score(test_data,results_test)
+	print clf2.score(training_data,results_training)
 
 def hold_out_training(training_data,results):
 	print 'Length : ' + str(len(training_data))

@@ -5,7 +5,7 @@ file_handler_feature_vectors_heroes_reverse = open('feature_vectors_heroes_rever
 file_handler_xml_extracted = open('features_local.csv','r')
 file_handler_regression_features = open('features_regression.csv','w')
 lines = file_handler_xml_extracted.readlines()
-lines = list(set(lines))
+#lines = list(set(lines))
 def populate_regression_features():
 	for line in lines:
 		line = line.strip()
@@ -164,7 +164,7 @@ for line in lines:
 	match_counter = match_counter + 1
 
 
-populate_regression_features()
+#populate_regression_features()
 
 
 
