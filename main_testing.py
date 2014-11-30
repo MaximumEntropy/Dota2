@@ -13,7 +13,7 @@ file_handler_match_id_manu = open('post_mid_term_ids.txt','r')
 #file_handler_features = open('match_features.csv','a')
 file_handler_features = open('feature_vectors.csv','r')
 
-file_handler_features_heroes = open('feature_vectors_heroes.csv','r')
+file_handler_features_heroes = open('bigram_features.csv','r')
 
 '''
 fetcher.get_match_recursively()

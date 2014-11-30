@@ -18,7 +18,7 @@ import random
 import plots
 
 model = BernoulliRBM(n_components=2)
-rf = RandomForestClassifier(n_estimators=15, max_depth=15,min_samples_split=8, random_state=0, criterion='entropy')
+rf = RandomForestClassifier(n_estimators=15, max_depth=15,min_samples_split=8, random_state=0, criterion='entropy',n_jobs=-1)
 et = ExtraTreesClassifier()
 ab = AdaBoostClassifier()
 clf2 = svm.LinearSVC()
@@ -32,11 +32,11 @@ bnb = BernoulliNB()
 prcp = Perceptron()
 rbm = BernoulliRBM(random_state=0, verbose=True)
 rbm.learning_rate = 0.1
-rbm.n_iter = 50
+rbm.n_iter = 5
 rbm.n_components = 1000
 
 classifier = Pipeline(steps=[('rbm', rbm), ('logreg', logreg)])
-file_handler_features = open('feature_vectors_heroes.csv','r')
+file_handler_features = open('bigram_features.csv','r')
 
 def unique(training_data,test_data):
 	for item in training_data:
@@ -52,12 +52,6 @@ def hold_out(training_data,results):
 	results_test = results[-int(0.1*len(results)):]
 	zeros = 0
 	ones = 0
-	for item in results_training:
-		if item == 0:
-			zeros = zeros + 1
-		else:
-			ones = ones + 1
-	print zeros,ones
 	# unique(training_data,test_data)
 	print 'Training Items : ' + str(len(training_data))
 	print 'Test Items : ' + str(len(test_data))
@@ -90,9 +84,9 @@ def hold_out(training_data,results):
 		#training_scores_logreg.append(logreg.score(training_data,results_training))
 	plots.plot(training_scores_logreg,testing_scores_logreg,training_scores_svm,testing_scores_svm ,training_scores_rf ,testing_scores_rf ,training_scores_bnb , testing_scores_bnb)
 	'''
-	clf.fit(training_data,results_training)
-	print clf.score(test_data,results_test)
-	print clf.score(training_data,results_training)
+	rf.fit(training_data,results_training)
+	print rf.score(test_data,results_test)
+	print rf.score(training_data,results_training)
 	#print rf.feature_importances_
 
 lines = file_handler_features.readlines()
