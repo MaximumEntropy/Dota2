@@ -84,9 +84,9 @@ def hold_out(training_data,results):
 		#training_scores_logreg.append(logreg.score(training_data,results_training))
 	plots.plot(training_scores_logreg,testing_scores_logreg,training_scores_svm,testing_scores_svm ,training_scores_rf ,testing_scores_rf ,training_scores_bnb , testing_scores_bnb)
 	'''
-	rf.fit(training_data,results_training)
-	print rf.score(test_data,results_test)
-	print rf.score(training_data,results_training)
+	knn.fit(training_data,results_training)
+	print knn.score(test_data,results_test)
+	print knn.score(training_data,results_training)
 	#print rf.feature_importances_
 
 lines = file_handler_features.readlines()
