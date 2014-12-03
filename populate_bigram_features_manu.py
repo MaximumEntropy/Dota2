@@ -1,11 +1,11 @@
 import itertools
 f = open('features_local.csv','r')
-file_handler_feature_vectors = open('bigram_features.csv','w')
+file_handler_feature_vectors = open('bigram_features_manu.csv','w')
 lines = f.readlines()
-hero_ids = range(112)
+hero_ids = range(111)
 hero_bigrams = itertools.combinations(hero_ids,2)
 bigram_dict = {}
-counter = 1
+counter = 0
 for bigram in hero_bigrams:
 	bigram_dict[bigram] = counter
 	counter = counter + 1
@@ -30,21 +30,26 @@ for line in lines:
 		continue
 	game_bigrams_radiant = itertools.combinations(list(set(hero_ids[:5])),2)
 	game_bigrams_dire = itertools.combinations(list(set(hero_ids[5:])),2)
-	feature_vector = [0 for i in range(6216*2+1)]
+	feature_vector = [0 for i in range(6105*2+1+220)]
 	for bigram in game_bigrams_radiant:
 		try:
 			bigram_id = bigram_dict[bigram]
 		except KeyError:
 			bigram = bigram[::-1]
 			bigram_id = bigram_dict[bigram]
-		feature_vector[bigram_id] = 1
+		feature_vector[220+bigram_id] = 1
 	for bigram in game_bigrams_dire:
 		try:
 			bigram_id = bigram_dict[bigram]
 		except KeyError:
 			bigram = bigram[::-1]
 			bigram_id = bigram_dict[bigram]
-		feature_vector[6216 + bigram_id] = 1
+		feature_vector[220+6105 + bigram_id] = 1
+# 	put in the unigram features at the start
+	for heroId in list(set(hero_ids[:5])):
+		feature_vector[heroId-1] = 1;
+	for heroId in list(set(hero_ids[5:])):
+		feature_vector[110+heroId-1]=1;
 	feature_vector.append(str(result))
 	for item in feature_vector:
 		file_handler_feature_vectors.write(str(item) + ',')

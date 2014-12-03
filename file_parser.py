@@ -1,12 +1,12 @@
 import xml.etree.ElementTree as ET
 import os
-file_handler_features_heroes = open('features_local.csv','w')
+file_handler_features_heroes = open('features_local.csv','a')
 match_number = 1
-for file_name in os.listdir('Matches'):
+for file_name in os.listdir('games'):
 	print 'Match Number : ' + str(match_number)
 	if file_name[-3:] == 'xml':
 		try:
-			tree = ET.parse('Matches/'+file_name)
+			tree = ET.parse('games/'+file_name)
 		except ET.ParseError:
 			print 'Parse Failed!!'
 			continue

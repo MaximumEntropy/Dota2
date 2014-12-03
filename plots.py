@@ -8,7 +8,7 @@ def plot(training_scores_logreg,testing_scores_logreg,training_scores_svm,testin
 	#y_svm = accuracies_svm
 	#y_svm_rbf = accuracies_svm_rbf
 	x = range(len(testing_scores_logreg))
-	x = [i*500 for i in x]
+	x = [i*1000 for i in x]
 	#f = interpolate.interp1d(x, y)
 	#plt.plot(x,y,'o',x,f(x),'-',label='interpolated')
 	lr, = plt.plot(x, training_scores_logreg, label='Logistic Regression')
